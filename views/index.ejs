@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+    <title>M-ditor</title>
+    <style>
+        body,
+        html {
+            height: 100%;
+        }
+
+        #editor {
+            height: 100%;
+        }
+
+        body>div:first-child {
+            height: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body>div:nth-child(2) {
+            height: 30%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            font-family: "Ubuntu Mono", monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #console {
+            height: 100%;
+            margin: 0;
+            overflow-y: auto;
+            font-family: "Ubuntu Mono", monospace;
+        }
+
+        [action] {
+            cursor: pointer;
+        }
+
+        nav>span {
+            display: block;
+            font-size: medium;
+        }
+
+        .head {
+            background-color: #383e56;
+        }
+
+        .h-btn {
+            background-color: #c5d7bd
+        }
+
+        .ace_content {
+            background-color: #faf3e0;
+            
+        }
+
+        #loader {
+            display: none;
+            position: fixed;
+            /* Stay in place */
+            z-index: 2;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            
+            
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0);
+            /* Black w/ opacity */
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .kinetic {
+            position: relative;
+            height: 10px;
+            width: 10px;
+        }
+
+        .kinetic::after{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-bottom-color: #383e56;
+            animation: rotateA 2s linear infinite 0.5s;
+        }
+        
+        .kinetic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-bottom-color: #fb743e;
+            animation: rotateA 2s linear infinite 0.5s;
+        }
+
+        .kinetic::before {
+            transform: rotate(90deg);
+            animation: rotateB 2s linear infinite;
+        }
+
+        @keyframes rotateA {
+
+            0%,
+            25% {
+                transform: rotate(0deg);
+            }
+
+            50%,
+            75% {
+                transform: rotate(180deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotateB {
+
+            0%,
+            25% {
+                transform: rotate(90deg);
+            }
+
+            50%,
+            75% {
+                transform: rotate(270deg);
+            }
+
+            100% {
+                transform: rotate(450deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+
+    <div>
+        <nav class="text-light d-flex align-items-center pl-2 head"><span><b>M-ditor</b></span>
+            <form action="/" method="post" enctype="multipart/form-data">
+                <span>
+                    <input type="file" name="myFile">
+                    <button type="submit" id="extract">Extract</button>
+                </span>
+            </form>
+            <div class="btn head text-light" action>EXECUTE</div>
+        </nav>
+        <div id="editor"></div>
+    </div>
+    <div>
+        <nav class="text-light d-flex align-items-center pl-2" style="background-color: #fb743e;"><span>Dev Console (Use
+                Ctrl-I to clear console)</span>
+            <div class="btn btn-dark" action>CLEAR</div>
+        </nav>
+        <pre id="console"
+            class="border border-dark bg-light text-dark p-2">Welcome to the JS Console<br />&raquo;  </pre>
+    </div>
+    <div id="loader">
+        
+        <div class="kinetic">
+            <p style="margin-top: 3em;">Please wait...</p><br>
+        </div>
+    </div>
+    <input type="hidden" id="code" value="<%=typeof xyz !='undefined' ? xyz : '' %>">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="./src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+
+        // initialize the content of the text editor to some Javascript
+        var codeString = $("#code").val();
+        if (codeString == '')
+            $("#editor").text(`function echo(m) {\n\treturn m;\n}\nconsole.log(echo("Hello World"));`);
+        else
+            $("#editor").text(codeString);
+        // initialize the editor environment using the ace library
+        var editor = ace.edit("editor");
+        editor.session.setMode("ace/mode/javascript"); // editor language
+        editor.setTheme("ace/theme/dawn"); // editor theme
+        editor.session.setTabSize(4);
+        editor.session.setUseWrapMode(true);
+
+        // Override default console functions for our custom Dev Console
+        (function () {
+            // store default console functionality before changing them
+            default_log = console.log;
+            default_clear = console.clear;
+            default_error = console.error;
+            default_warn = console.warn;
+
+            console.log = function (...args) {
+                for (let arg of args) {
+                    if (typeof arg == 'object') {
+                        $("#console").append((JSON && JSON.stringify ? JSON.stringify(arg, undefined, 2) : arg) + ' ');
+                    } else {
+                        $("#console").append(arg + ' ');
+                    }
+                }
+                // Console prompt
+                $("#console").append('\n&raquo;  ');
+
+                // So console is always scrolled to the bottom
+                $("#console").get(0).scrollTop = $("#console").get(0).scrollHeight;
+
+                // Allow the default console action to happen
+                default_log(...args)
+            }
+            console.error = function (e) {
+
+                $("#console").append("Error: " + e);
+
+                // Console prompt
+                $("#console").append('\n&raquo;  ');
+
+                // So console is always scrolled to the bottom
+                $("#console").get(0).scrollTop = $("#console").get(0).scrollHeight;
+
+                // Allow the default console action to happen
+                default_error(e)
+            }
+            console.warn = function (w) {
+                $("#console").append("Warning: " + w);
+
+                // Console prompt
+                $("#console").append('\n&raquo;  ');
+
+                // So console is always scrolled to the bottom
+                $("#console").get(0).scrollTop = $("#console").get(0).scrollHeight;
+
+                // Allow the default console action to happen
+                default_warn(w)
+            }
+            console.clear = function () {
+                // Console prompt
+                $("#console").html("&raquo;  ");
+                // Allow the default console action to happen
+                default_clear();
+            }
+            clear = console.clear;
+        })();
+
+        // For our custom clear and execute shortcuts Ctrl-Enter and Ctrl-I
+        function kbd(e) {
+            if (e.key === "i") console.clear();
+            if (e.key === "Enter") eval(editor.getValue());
+        }
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === "Control") window.addEventListener('keydown', kbd);
+        });
+        window.addEventListener('keyup', function (e) {
+            if (e.key === "Control") window.removeEventListener('keydown', kbd);
+        })
+        // For phones and devices without a control key
+        $("[action]").get(1).addEventListener('click', function () { eval(editor.getValue()); });
+        $("[action]").get(2).addEventListener('click', function () { console.clear(); });
+        $("#extract").on('click', function () { $('#loader').css('display','flex') });
+    </script>
+    <!-- 
+    <form action="/uploadfile" method="post" enctype="multipart/form-data">
+        <input type="file" name="myFile" />
+        <input type="submit" value="submit">
+    </form>
+
+    <textarea name="code" id="code" cols="30" rows="10"><%= typeof xyz != 'undefined' ? xyz : '' %></textarea>
+    <button id="codeRun">Run</button>
+    <div id="result"></div> -->
+
+
+</body>
+
+</html>
